@@ -1,0 +1,42 @@
+import com.xuggle.mediatool.IMediaReader;
+import com.xuggle.mediatool.IMediaWriter;
+import com.xuggle.mediatool.ToolFactory;
+import com.xuggle.xuggler.IContainer;
+
+public class VideoClipper {
+
+    public static void main(String[] args) {
+        String inputFilePath = "input.mp4"; // Input video file path
+        String outputFilePath = "output.mp4"; // Output video file path
+        double startTime = 10.0; // Start time (in seconds)
+        double duration = 20.0; // Duration (in seconds)
+
+        clipVideo(inputFilePath, outputFilePath, startTime, duration);
+    }
+
+    public static void clipVideo(String inputFilePath, String outputFilePath, double startTime, double duration) {
+        // Create a reader to read the input video file
+        IMediaReader mediaReader = ToolFactory.makeReader(inputFilePath);
+
+        // Create a writer to write the clipped video file
+        IMediaWriter mediaWriter = ToolFactory.makeWriter(outputFilePath, mediaReader);
+
+        // Get the container of the input video file
+        IContainer container = mediaReader.getContainer();
+
+        // Set start time
+        mediaReader.setStartTime(startTime);
+
+        // Set duration
+        mediaReader.setDuration(duration);
+
+        // Read video frames and write to the output video file
+        while (mediaReader.readPacket() == null) {
+            mediaWriter.encodeVideo(0, mediaReader.readPacket(), container.getStartTime(), container.getTimeBase());
+        }
+
+        // Close the reader and writer
+        mediaReader.close();
+        mediaWriter.close();
+    }
+}
